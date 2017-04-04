@@ -12,6 +12,8 @@ import (
 	"text/template"
 )
 
+const listenPort = ":8080"
+
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 	filename := "blogIndex.html"
 	body, _ := ioutil.ReadFile(filename)
@@ -68,7 +70,7 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println("Error executing template: ", err)
 	}
-	file, err := os.Create(ctx.Title[1:len(ctx.Title)-1]+".md")
+	file, err := os.Create("./content/projects/"+ctx.Title[1:len(ctx.Title)-1]+".md")
 	if err != nil{
 		fmt.Println("error creating file: ", err)
 	}
@@ -92,5 +94,5 @@ func main() {
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/", viewHandler)
 	http.HandleFunc("/save/", saveHandler)
-	http.ListenAndServe(":8080", nil)
+	http.ListenAndServe(listenPort, nil)
 }
