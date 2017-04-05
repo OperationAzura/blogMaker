@@ -1,15 +1,15 @@
 package main
 
 import (
-	"os/exec"
-		"time"
-	"os"
 	"bytes"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"os"
+	"os/exec"
 	"text/template"
+	"time"
 )
 
 const listenPort = ":8080"
@@ -43,24 +43,24 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	ctx.Date = time.Now().Format("2017-03-18T22:18:08-05:00")
-
-
-		if ctx.Image != ""{
-			if ctx.Image[4:] == "http"{
-				cmd := exec.Command("wget", "-O", "./static/images/"+ctx.Title+".jpg", ctx.Image)
-				err := cmd.Start()
-				if err != nil {
-					fmt.Println(err)
-				}
-				fmt.Printf("Waiting for command to finish...")
-				err = cmd.Wait()
-				if err != nil{
-					fmt.Printf("Command finished with error: %v", err)
-				}
-				ctx.Image = ctx.Title+".jpg"
+	ctx.Date = time.Now().Format("2017-03-18")
+	ctx.Body = ctx.Body[1:len(ctx.Body)]
+	fmt.Println(ctx.Image)
+	if ctx.Image != "" {
+		if ctx.Image[1:5] == "http" {
+			cmd := exec.Command("wget", "-O", "./static/images/"+ctx.Title+".jpg", ctx.Image)
+			err = cmd.Start()
+			if err != nil {
+				fmt.Println(err)
 			}
+			fmt.Printf("Waiting for command to finish...")
+			err = cmd.Wait()
+			if err != nil {
+				fmt.Printf("Command finished with error: %v", err)
+			}
+			ctx.Image = ctx.Title + ".jpg"
 		}
+	}
 
 	t, err := template.ParseFiles("./blogTemplate.t")
 	if err != nil {
@@ -70,12 +70,12 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println("Error executing template: ", err)
 	}
-	file, err := os.Create("./content/projects/"+ctx.Title[1:len(ctx.Title)-1]+".md")
-	if err != nil{
+	file, err := os.Create(`./content/project/` + ctx.Title[1:len(ctx.Title)-1] + ".md")
+	if err != nil {
 		fmt.Println("error creating file: ", err)
 	}
-	 file.Write(blogData.Bytes())
-	 file.Close()
+	file.Write(blogData.Bytes())
+	file.Close()
 	fmt.Println(blogData.String())
 	fmt.Println("cat: ", ctx.Categories)
 	/*fmt.Println("Title: ", t.Title)

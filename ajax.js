@@ -36,7 +36,7 @@
   }
 
   function submit() {
-    url = "http://derekspace.ddns.net:8080//save/";
+    url = "http://derekspace.ddns.net:8080/save/";
     cFunction = function() {
       document.getElementById("success").innerHTML = "success!";
     };

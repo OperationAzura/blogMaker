@@ -9,7 +9,7 @@
   "categories": "{{.Categories}}",
   "draft": {{.Draft}}
 }
-{{if .Video}}<iframe width="560" height="315" src="{{.Video}}" frameborder="0" allowfullscreen></iframe>{{end}}
+{{if .Video}}<iframe width="560" height="315" src={{.Video}} frameborder="0" allowfullscreen></iframe>{{end}}
 
 {{.Body}}
 {{end}}
