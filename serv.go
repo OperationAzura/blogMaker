@@ -43,7 +43,7 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println(err)
 	}
-	ctx.Date = time.Now().Format("2017-03-18")
+	ctx.Date = time.Now() //.Format("2017-03-18")
 	ctx.Body = ctx.Body[1:len(ctx.Body)]
 	fmt.Println(ctx.Image)
 	if ctx.Image != "" {
