@@ -75,14 +75,13 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 	file.Close()
 	fmt.Println(blogData.String())
 	fmt.Println("cat: ", ctx.Categories)
-	go func() {
-		time.Sleep(500)
-		cmd := exec.Command("hugo")
-		err = cmd.Run()
-		if err != nil {
-			fmt.Println("error executing command: ", err)
-		}
-	}()
+
+	time.Sleep(5000)
+	cmd := exec.Command("hugo")
+	err = cmd.Run()
+	if err != nil {
+		fmt.Println("error executing command: ", err)
+	}
 	blogData.Reset()
 }
 
