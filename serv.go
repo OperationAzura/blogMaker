@@ -14,11 +14,15 @@ import (
 
 const listenPort = ":8080"
 
+//viewHandler is the basic http handler to display the form
 func viewHandler(w http.ResponseWriter, r *http.Request) {
 	filename := "blogIndex.html"
 	body, _ := ioutil.ReadFile(filename)
 	fmt.Fprintf(w, string(body))
 }
+
+//channel to send context to template
+var ctxChan = make(chan (BlogCTX), 2)
 
 //BlogCTX holds the context for the blog file
 type BlogCTX struct {
@@ -39,37 +43,43 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 	var blogData bytes.Buffer
 	var ctx BlogCTX
 	err := decoder.Decode(&ctx)
-
 	if err != nil {
 		fmt.Println(err)
 	}
-	ctx.Date = time.Now().Format("2006-01-02T15:04:05") //
-	ctx.Body = ctx.Body[1:len(ctx.Body)]
-	fmt.Println(ctx.Image)
+	//if the image != nil and starts with http
+	//get the image, store it, and change the image name to match the created file, then send on the ctx channel
 	if ctx.Image != "" {
 		go func() {
 			fmt.Println(ctx.Image[:4])
 			if ctx.Image[:4] == "http" {
+				ctx.Image = ctx.Title + ".jpg"
+				ctxChan <- ctx
 				cmd := exec.Command("wget", "-O", "./static/images/"+ctx.Title+".jpg", ctx.Image)
 				err = cmd.Start()
 				if err != nil {
 					fmt.Println(err)
-				}
-				fmt.Printf("Waiting for command to finish...")
-				err = cmd.Wait()
-				if err != nil {
-					fmt.Printf("Command finished with error: %v", err)
-				}
-				ctx.Image = ctx.Title + ".jpg"
+				} /*
+					fmt.Printf("Waiting for command to finish...")
+					err = cmd.Wait()
+					if err != nil {
+						fmt.Printf("Command finished with error: %v", err)
+					}*/
+
 			}
 		}()
+	} else {
+		ctxChan <- ctx
 	}
+	ctx.Date = time.Now().Format("2006-01-02T15:04:05") //
+	ctx.Body = ctx.Body[1:len(ctx.Body)]
+	fmt.Println(ctx.Image)
 
+	fmt.Println(ctx.Image)
 	t, err := template.ParseFiles("./blogTemplate.t")
 	if err != nil {
 		fmt.Println("error parsing template: ", err)
 	} //fill requestBody with the executed template and context
-	err = t.Execute(&blogData, ctx)
+	err = t.Execute(&blogData, <-ctxChan)
 	if err != nil {
 		fmt.Println("Error executing template: ", err)
 	}
