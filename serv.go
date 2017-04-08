@@ -47,19 +47,22 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 	ctx.Body = ctx.Body[1:len(ctx.Body)]
 	fmt.Println(ctx.Image)
 	if ctx.Image != "" {
-		if ctx.Image[1:5] == "http" {
-			cmd := exec.Command("wget", "-O", "./static/images/"+ctx.Title+".jpg", ctx.Image)
-			err = cmd.Start()
-			if err != nil {
-				fmt.Println(err)
+		go func() {
+			fmt.Println(ctx.Image[1:5])
+			if ctx.Image[1:5] == "http" {
+				cmd := exec.Command("wget", "-O", "./static/images/"+ctx.Title+".jpg", ctx.Image)
+				err = cmd.Start()
+				if err != nil {
+					fmt.Println(err)
+				}
+				fmt.Printf("Waiting for command to finish...")
+				err = cmd.Wait()
+				if err != nil {
+					fmt.Printf("Command finished with error: %v", err)
+				}
+				ctx.Image = ctx.Title + ".jpg"
 			}
-			fmt.Printf("Waiting for command to finish...")
-			err = cmd.Wait()
-			if err != nil {
-				fmt.Printf("Command finished with error: %v", err)
-			}
-			ctx.Image = ctx.Title + ".jpg"
-		}
+		}()
 	}
 
 	t, err := template.ParseFiles("./blogTemplate.t")
@@ -70,7 +73,7 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println("Error executing template: ", err)
 	}
-	file, err := os.Create(`./content/project/` + ctx.Title[1:len(ctx.Title)-1] + ".md")
+	file, err := os.Create(`./content/project/` + ctx.Title[:len(ctx.Title)-1] + ".md")
 	if err != nil {
 		fmt.Println("error creating file: ", err)
 	}
@@ -78,6 +81,13 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 	file.Close()
 	fmt.Println(blogData.String())
 	fmt.Println("cat: ", ctx.Categories)
+	go func() {
+		cmd := exec.Command("hugo")
+		err = cmd.Run()
+		if err != nil {
+			fmt.Println("error executing command: ", err)
+		}
+	}()
 	/*fmt.Println("Title: ", t.Title)
 	fmt.Println("Description: ", t.Description)
 	fmt.Println("Image: ", t.Image)
