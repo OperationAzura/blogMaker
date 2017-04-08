@@ -49,41 +49,35 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 	//if the image != nil and starts with http
 	//get the image, store it, and change the image name to match the created file, then send on the ctx channel
 	if ctx.Image != "" {
-		go func() {
-			fmt.Println(ctx.Image[:4])
-			if ctx.Image[:4] == "http" {
-				ctx.Image = ctx.Title + ".jpg"
-				ctxChan <- ctx
-				cmd := exec.Command("wget", "-O", "./static/images/"+ctx.Title+".jpg", ctx.Image)
-				err = cmd.Start()
-				if err != nil {
-					fmt.Println(err)
-				} /*
-					fmt.Printf("Waiting for command to finish...")
-					err = cmd.Wait()
-					if err != nil {
-						fmt.Printf("Command finished with error: %v", err)
-					}*/
 
+		fmt.Println(ctx.Image[:4])
+		if ctx.Image[:4] == "http" {
+			ctx.Image = ctx.Title + ".jpg"
+
+			cmd := exec.Command("wget", "-O", "./static/images/"+ctx.Title+".jpg", ctx.Image)
+			err = cmd.Start()
+			if err != nil {
+				fmt.Println(err)
 			}
-		}()
-	} else {
-		ctxChan <- ctx
+
+		}
+
 	}
 	ctx.Date = time.Now().Format("2006-01-02T15:04:05") //
 	ctx.Body = ctx.Body[1:len(ctx.Body)]
 	fmt.Println(ctx.Image)
 
-	fmt.Println(ctx.Image)
+	fmt.Println("image", ctx.Image)
+	fmt.Println("title", ctx.Title)
 	t, err := template.ParseFiles("./blogTemplate.t")
 	if err != nil {
 		fmt.Println("error parsing template: ", err)
 	} //fill requestBody with the executed template and context
-	err = t.Execute(&blogData, <-ctxChan)
+	err = t.Execute(&blogData, ctx)
 	if err != nil {
 		fmt.Println("Error executing template: ", err)
 	}
-	file, err := os.Create(`./content/project/` + ctx.Title[:len(ctx.Title)-1] + ".md")
+	file, err := os.Create(`./content/project/` + ctx.Title + ".md")
 	if err != nil {
 		fmt.Println("error creating file: ", err)
 	}
@@ -98,14 +92,6 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 			fmt.Println("error executing command: ", err)
 		}
 	}()
-	/*fmt.Println("Title: ", t.Title)
-	fmt.Println("Description: ", t.Description)
-	fmt.Println("Image: ", t.Image)
-	fmt.Println("Video: ", t.Video)
-	fmt.Println("Tags: ", t.Tags)
-	fmt.Println("Categories: ", t.Categories)
-	fmt.Println("Draft: ", t.Draft)
-	fmt.Println("Body: ", t.Body)*/
 	blogData.Reset()
 }
 
