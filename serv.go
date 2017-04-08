@@ -48,8 +48,8 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Println(ctx.Image)
 	if ctx.Image != "" {
 		go func() {
-			fmt.Println(ctx.Image[1:5])
-			if ctx.Image[1:5] == "http" {
+			fmt.Println(ctx.Image[:4])
+			if ctx.Image[:4] == "http" {
 				cmd := exec.Command("wget", "-O", "./static/images/"+ctx.Title+".jpg", ctx.Image)
 				err = cmd.Start()
 				if err != nil {
