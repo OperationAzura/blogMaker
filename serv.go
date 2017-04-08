@@ -49,26 +49,16 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 	//if the image != nil and starts with http
 	//get the image, store it, and change the image name to match the created file, then send on the ctx channel
 	if ctx.Image != "" {
-
-		fmt.Println(ctx.Image[:4])
 		if ctx.Image[:4] == "http" {
-			ctx.Image = ctx.Title + ".jpg"
-
 			cmd := exec.Command("wget", "-O", "./static/images/"+ctx.Title+".jpg", ctx.Image)
 			err = cmd.Start()
 			if err != nil {
 				fmt.Println(err)
 			}
-
+			ctx.Image = ctx.Title + ".jpg"
 		}
-
 	}
 	ctx.Date = time.Now().Format("2006-01-02T15:04:05") //
-	ctx.Body = ctx.Body[1:len(ctx.Body)]
-	fmt.Println(ctx.Image)
-
-	fmt.Println("image", ctx.Image)
-	fmt.Println("title", ctx.Title)
 	t, err := template.ParseFiles("./blogTemplate.t")
 	if err != nil {
 		fmt.Println("error parsing template: ", err)
