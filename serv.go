@@ -76,6 +76,7 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Println(blogData.String())
 	fmt.Println("cat: ", ctx.Categories)
 	go func() {
+		time.Sleep(500)
 		cmd := exec.Command("hugo")
 		err = cmd.Run()
 		if err != nil {
