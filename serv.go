@@ -76,7 +76,9 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 	fmt.Println(blogData.String())
 	fmt.Println("cat: ", ctx.Categories)
 
-	time.Sleep(5000)
+	//the hugo command runs too soon I think
+	//it seems to run before the image is ready
+	time.Sleep(50000)
 	cmd := exec.Command("hugo")
 	err = cmd.Run()
 	if err != nil {
