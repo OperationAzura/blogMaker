@@ -7,7 +7,7 @@
   "date": "{{.Date}}",
   "tags": ["{{.Tags}}"],
   "categories": ["{{.Categories}}"],
-  "draft": {{.Draft}}
+  "draft": "{{.Draft}}"
 }
 {{if .Video}}<iframe width="560" height="315" src={{.Video}} frameborder="0" allowfullscreen></iframe>{{end}}
 
