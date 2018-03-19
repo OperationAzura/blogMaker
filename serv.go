@@ -79,8 +79,6 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 	}
 	file.Write(blogData.Bytes())
 	file.Close()
-	fmt.Println(blogData.String())
-	fmt.Println("cat: ", ctx.Categories)
 	go func() {
 		cmd := exec.Command("hugo")
 		err = cmd.Run()
