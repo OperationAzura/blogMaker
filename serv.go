@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"strings"
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
@@ -44,7 +45,7 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 		fmt.Println(err)
 	}
 	ctx.Date = time.Now().Format("2006-01-02T15:04:05") //
-	ctx.Body = ctx.Body[1:len(ctx.Body)]
+	ctx.Body = ctx.Body
 	fmt.Println(ctx.Image)
 	if ctx.Image != "" {
 		go func() {
@@ -73,7 +74,7 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		fmt.Println("Error executing template: ", err)
 	}
-	file, err := os.Create(`./content/project/` + ctx.Title[:len(ctx.Title)-1] + ".md")
+	file, err := os.Create(`./content/project/` + strings.Replace(ctx.Title," ", "", -1 ) + ".md")
 	if err != nil {
 		fmt.Println("error creating file: ", err)
 	}
