@@ -28,7 +28,9 @@ type BlogCTX struct {
 	Image       string
 	Video       string
 	Tags        string
+	TagSlice    []string
 	Categories  string
+	CatSlice    []string
 	Draft       string
 	Date        string
 	Body        string
@@ -37,13 +39,15 @@ type BlogCTX struct {
 // SaveHandler saves edited wiki data and reloads pages
 func saveHandler(w http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
-	var blogData bytes.Buffer
+	var blogData = bytes.Buffer{}
 	var ctx BlogCTX
 	err := decoder.Decode(&ctx)
-
 	if err != nil {
 		fmt.Println(err)
 	}
+	fmt.Println(strings.Split(ctx.Tags, " ")[1])
+	ctx.TagSlice = strings.Split(ctx.Tags, " ")
+	ctx.CatSlice = strings.Split(ctx.Categories, " ")
 	ctx.Date = time.Now().Format("2006-01-02T15:04:05") //
 	ctx.Body = ctx.Body
 	fmt.Println(ctx.Image)
@@ -66,7 +70,7 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 		}()
 	}
 
-	t, err := template.ParseFiles("./blogTemplate.t")
+	t, err := template.New("blogTemplate.t").Funcs(NextIndex).ParseFiles("./blogTemplate.t")
 	if err != nil {
 		fmt.Println("error parsing template: ", err)
 	} //fill requestBody with the executed template and context
@@ -104,4 +108,11 @@ func main() {
 	http.HandleFunc("/", viewHandler)
 	http.HandleFunc("/save/", saveHandler)
 	http.ListenAndServe(listenPort, nil)
+}
+
+//NextIndex is a function for the go templates to do basic math
+var NextIndex = template.FuncMap{
+	"NextIndex": func(i int) int {
+		return i + 1
+	},
 }
