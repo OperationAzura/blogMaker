@@ -41,33 +41,37 @@ func saveHandler(w http.ResponseWriter, req *http.Request) {
 	decoder := json.NewDecoder(req.Body)
 	var blogData = bytes.Buffer{}
 	var ctx BlogCTX
+	ctx.TagSlice = make([]string, 0)
+	ctx.CatSlice = make([]string, 0)
 	err := decoder.Decode(&ctx)
 	if err != nil {
 		fmt.Println(err)
 	}
-	fmt.Println(strings.Split(ctx.Tags, " ")[1])
+	fmt.Println(strings.Split(ctx.Tags, " "))
 	ctx.TagSlice = strings.Split(ctx.Tags, " ")
 	ctx.CatSlice = strings.Split(ctx.Categories, " ")
 	ctx.Date = time.Now().Format("2006-01-02T15:04:05") //
 	ctx.Body = ctx.Body
 	fmt.Println(ctx.Image)
 	if ctx.Image != "" {
-		go func() {
+		
 			fmt.Println(ctx.Image[:4])
 			if ctx.Image[:4] == "http" {
-				cmd := exec.Command("wget", "-O", "./static/images/"+ctx.Title+".jpg", ctx.Image)
+				cmd := exec.Command("wget", "-O", "./static/images/"+strings.Replace(ctx.Title, " ", "", -1)+".jpg", ctx.Image)
 				err = cmd.Start()
 				if err != nil {
 					fmt.Println(err)
 				}
-				fmt.Printf("Waiting for command to finish...")
+				fmt.Printf("Waiting for image command to finish...")
 				err = cmd.Wait()
 				if err != nil {
 					fmt.Printf("Command finished with error: %v", err)
 				}
-				ctx.Image = ctx.Title + ".jpg"
+				fmt.Println("done waiting for image")
 			}
-		}()
+		
+		ctx.Image = strings.Replace(ctx.Title, " ", "", -1) + ".jpg"
+
 	}
 
 	t, err := template.New("blogTemplate.t").Funcs(NextIndex).ParseFiles("./blogTemplate.t")
